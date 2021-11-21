@@ -1,0 +1,24 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steam
+  labels:
+    app.kubernetes.io/name: steam
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: steam
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: steam
+    spec:
+      containers:
+        - name: steam
+          image: steam
+          env:
+            - name: GOWON_BROKER
+              value: mosquitto:1883
+            - name: GOWON_STEAM_API_KEY
+              value: API_KEY
