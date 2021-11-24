@@ -97,7 +97,7 @@ func genSteamHandler(apiKey string, kv *bolt.DB) func(m gowon.Message) (string, 
 		switch command {
 		case "s", "set":
 			return setUserHandler(kv, m.Nick, user)
-		case "l", "last":
+		case "r", "recent":
 			return CommandHandler(kv, m.Nick, user, apiKey, steamLastGame)
 		case "a", "achievement":
 			return CommandHandler(kv, m.Nick, user, apiKey, steamLastAchievement)
