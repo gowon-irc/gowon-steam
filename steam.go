@@ -28,12 +28,12 @@ type resolveVanityURLRes struct {
 	}
 }
 
-func steamGetId(apiKey, user string) (string, error) {
+func steamGetId(apiKey, user string, client *http.Client) (string, error) {
 	url := fmt.Sprintf(resolveVanityUrl, apiKey, user)
 
 	j := &resolveVanityURLRes{}
 
-	res, err := http.Get(url)
+	res, err := client.Get(url)
 	if err != nil {
 		return "", err
 	}
@@ -80,12 +80,12 @@ func (rpr recentlyPlayedRes) Ids() (out []int) {
 	return out
 }
 
-func getRecentlyPlayed(apiKey, id string) (*recentlyPlayedRes, error) {
+func getRecentlyPlayed(apiKey, id string, client *http.Client) (*recentlyPlayedRes, error) {
 	url := fmt.Sprintf(recentlyPlayedUrl, apiKey, id)
 
 	j := &recentlyPlayedRes{}
 
-	res, err := http.Get(url)
+	res, err := client.Get(url)
 	if err != nil {
 		return j, err
 	}
@@ -118,8 +118,8 @@ func colourList(in []string) (out []string) {
 	return out
 }
 
-func steamLastGame(apiKey, user string) (string, error) {
-	id, err := steamGetId(apiKey, user)
+func steamLastGame(apiKey, user string, client *http.Client) (string, error) {
+	id, err := steamGetId(apiKey, user, client)
 
 	if errors.Is(profileNotFoundErr)(err) {
 		return fmt.Sprintf("Error: no id found for %s", user), nil
@@ -129,7 +129,7 @@ func steamLastGame(apiKey, user string) (string, error) {
 		return "", err
 	}
 
-	recentlyPlayed, err := getRecentlyPlayed(apiKey, id)
+	recentlyPlayed, err := getRecentlyPlayed(apiKey, id, client)
 	if err != nil {
 		return "", err
 	}
@@ -157,12 +157,12 @@ type playerAchievement struct {
 	Description string
 }
 
-func getAchievements(apiKey, id string, appId int) (*playerAchievementsRes, error) {
+func getAchievements(apiKey, id string, appId int, client *http.Client) (*playerAchievementsRes, error) {
 	url := fmt.Sprintf(playerAchievementsUrl, apiKey, id, appId)
 
 	j := &playerAchievementsRes{}
 
-	res, err := http.Get(url)
+	res, err := client.Get(url)
 	if err != nil {
 		return j, err
 	}
@@ -182,14 +182,14 @@ func getAchievements(apiKey, id string, appId int) (*playerAchievementsRes, erro
 	return j, nil
 }
 
-func newestAchievement(apiKey, id string, appIds []int) (string, error) {
+func newestAchievement(apiKey, id string, appIds []int, client *http.Client) (string, error) {
 	game := ""
 	newest := playerAchievement{
 		UnlockTime: 0,
 	}
 
 	for _, i := range appIds {
-		as, err := getAchievements(apiKey, id, i)
+		as, err := getAchievements(apiKey, id, i, client)
 		if err != nil {
 			return "", err
 		}
@@ -213,8 +213,8 @@ func newestAchievement(apiKey, id string, appIds []int) (string, error) {
 	return fmt.Sprintf("%s (%s) - %s", newest.Name, newest.Description, game), nil
 }
 
-func steamLastAchievement(apiKey, user string) (string, error) {
-	id, err := steamGetId(apiKey, user)
+func steamLastAchievement(apiKey, user string, client *http.Client) (string, error) {
+	id, err := steamGetId(apiKey, user, client)
 
 	if errors.Is(profileNotFoundErr)(err) {
 		return fmt.Sprintf("Error: no id found for %s", user), nil
@@ -224,12 +224,12 @@ func steamLastAchievement(apiKey, user string) (string, error) {
 		return "", err
 	}
 
-	recentlyPlayed, err := getRecentlyPlayed(apiKey, id)
+	recentlyPlayed, err := getRecentlyPlayed(apiKey, id, client)
 	if err != nil {
 		return "", err
 	}
 
-	n, err := newestAchievement(apiKey, id, recentlyPlayed.Ids())
+	n, err := newestAchievement(apiKey, id, recentlyPlayed.Ids(), client)
 
 	if errors.Is(profileNotPublicErr)(err) {
 		return "Error: profile is not public", nil

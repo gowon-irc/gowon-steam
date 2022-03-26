@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -73,9 +74,11 @@ func setUserHandler(kv *bolt.DB, nick, user string) (string, error) {
 	return fmt.Sprintf("set %s's user to %s", nick, user), nil
 }
 
-func CommandHandler(kv *bolt.DB, nick, user, apiKey string, f func(string, string) (string, error)) (string, error) {
+type commandFunc func(string, string, *http.Client) (string, error)
+
+func CommandHandler(kv *bolt.DB, nick, user, apiKey string, client *http.Client, f commandFunc) (string, error) {
 	if user != "" {
-		return f(apiKey, user)
+		return f(apiKey, user, client)
 	}
 
 	userC, err := getUser(kv, []byte(nick))
@@ -87,10 +90,10 @@ func CommandHandler(kv *bolt.DB, nick, user, apiKey string, f func(string, strin
 		return "Error: username needed", nil
 	}
 
-	return f(apiKey, string(userC))
+	return f(apiKey, string(userC), client)
 }
 
-func genSteamHandler(apiKey string, kv *bolt.DB) func(m gowon.Message) (string, error) {
+func genSteamHandler(apiKey string, kv *bolt.DB, client *http.Client) func(m gowon.Message) (string, error) {
 	return func(m gowon.Message) (string, error) {
 		command, user := parseArgs(m.Args)
 
@@ -98,9 +101,9 @@ func genSteamHandler(apiKey string, kv *bolt.DB) func(m gowon.Message) (string, 
 		case "s", "set":
 			return setUserHandler(kv, m.Nick, user)
 		case "r", "recent":
-			return CommandHandler(kv, m.Nick, user, apiKey, steamLastGame)
+			return CommandHandler(kv, m.Nick, user, apiKey, client, steamLastGame)
 		case "a", "achievement":
-			return CommandHandler(kv, m.Nick, user, apiKey, steamLastAchievement)
+			return CommandHandler(kv, m.Nick, user, apiKey, client, steamLastAchievement)
 		}
 
 		return "one of [s]et, [r]ecent or [a]chievements must be passed as a command", nil
@@ -157,8 +160,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	httpClient := &http.Client{}
+
 	mr := gowon.NewMessageRouter()
-	mr.AddCommand("steam", genSteamHandler(opts.APIKey, kv))
+	mr.AddCommand("steam", genSteamHandler(opts.APIKey, kv, httpClient))
 	mr.Subscribe(mqttOpts, moduleName)
 
 	log.Print("connecting to broker")
