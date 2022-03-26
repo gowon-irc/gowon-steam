@@ -103,7 +103,7 @@ func genSteamHandler(apiKey string, kv *bolt.DB) func(m gowon.Message) (string, 
 			return CommandHandler(kv, m.Nick, user, apiKey, steamLastAchievement)
 		}
 
-		return "one of [s]et, [l]ast or [a]chievements must be passed as a command", nil
+		return "one of [s]et, [r]ecent or [a]chievements must be passed as a command", nil
 	}
 }
 
