@@ -3,7 +3,7 @@ COPY . /src
 WORKDIR /src
 RUN go build -o gowon-steam
 
-FROM alpine:3.14.3
+FROM alpine:3.15.2
 RUN mkdir /data
 ENV GOWON_STEAM_KV_PATH /data/kv.db
 WORKDIR /app
