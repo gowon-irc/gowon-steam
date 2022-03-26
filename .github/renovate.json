@@ -1,5 +1,12 @@
 {
-  "extends": [
-    "config:base"
-  ]
+  "dependencyDashboard": true,
+  "enabled": true,
+  "packageRules": [
+    {
+      "matchDatasources": [ "github-tags" ],
+      "automerge": true,
+      "automergeType": "branch"
+    }
+  ],
+  "timezone": "Europe/London"
 }
