@@ -71,9 +71,13 @@ jobs:
         uses: imjasonh/setup-ko@v0.4
 
       - name: Build local image
-        run: ko build -B --platform linux/amd64,linux/arm64 --tags latest,${{ steps.prep.outputs.GITVERSIONF }} --push=false .
+        run: >
+          ko build --bare --platform linux/amd64,linux/arm64
+          --sbom none --tags latest,${{ steps.prep.outputs.GITVERSIONF }} --push=false .
         if: ${{ steps.prep.outputs.PUSH == 'false' }}
 
       - name: Build and push image
-        run: ko build -B --platform linux/amd64,linux/arm64 --tags latest,${{ steps.prep.outputs.GITVERSIONF }} .
+        run: >
+          ko build --bare --platform linux/amd64,linux/arm64
+          --sbom none --tags latest,${{ steps.prep.outputs.GITVERSIONF }} .
         if: ${{ steps.prep.outputs.PUSH == 'true' }}
