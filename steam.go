@@ -16,6 +16,11 @@ const (
 	playerAchievementsUrl = "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?key=%s&steamid=%s&appid=%d&format=json&l=en"
 )
 
+var (
+	profileNotFoundErr  = errors.New("id not found")
+	profileNotPublicErr = errors.New("profile is not public")
+)
+
 type resolveVanityURLRes struct {
 	Response struct {
 		SteamId string
@@ -46,7 +51,7 @@ func steamGetId(apiKey, user string) (string, error) {
 	}
 
 	if j.Response.Success != 1 {
-		return "", errors.Newf("No id found for %s", user)
+		return "", profileNotFoundErr
 	}
 
 	return j.Response.SteamId, nil
@@ -115,6 +120,11 @@ func colourList(in []string) (out []string) {
 
 func steamLastGame(apiKey, user string) (string, error) {
 	id, err := steamGetId(apiKey, user)
+
+	if errors.Is(profileNotFoundErr)(err) {
+		return fmt.Sprintf("Error: no id found for %s", user), nil
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -137,6 +147,7 @@ type playerAchievementsRes struct {
 	PlayerStats struct {
 		GameName     string
 		Achievements []playerAchievement
+		Error        string
 	}
 }
 
@@ -183,6 +194,10 @@ func newestAchievement(apiKey, id string, appIds []int) (string, error) {
 			return "", err
 		}
 
+		if as.PlayerStats.Error == "Profile is not public" {
+			return "", profileNotPublicErr
+		}
+
 		for _, a := range as.PlayerStats.Achievements {
 			if a.UnlockTime > newest.UnlockTime {
 				game = as.PlayerStats.GameName
@@ -200,6 +215,11 @@ func newestAchievement(apiKey, id string, appIds []int) (string, error) {
 
 func steamLastAchievement(apiKey, user string) (string, error) {
 	id, err := steamGetId(apiKey, user)
+
+	if errors.Is(profileNotFoundErr)(err) {
+		return fmt.Sprintf("Error: no id found for %s", user), nil
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -210,6 +230,11 @@ func steamLastAchievement(apiKey, user string) (string, error) {
 	}
 
 	n, err := newestAchievement(apiKey, id, recentlyPlayed.Ids())
+
+	if errors.Is(profileNotPublicErr)(err) {
+		return "Error: profile is not public", nil
+	}
+
 	if err != nil {
 		return "", err
 	}
