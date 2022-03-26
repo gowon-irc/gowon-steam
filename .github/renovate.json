@@ -5,7 +5,8 @@
     {
       "matchDatasources": [ "github-tags" ],
       "automerge": true,
-      "automergeType": "branch"
+      "automergeType": "branch",
+      "groupName": "github-tags"
     }
   ],
   "timezone": "Europe/London"
