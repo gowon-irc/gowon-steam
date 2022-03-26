@@ -5,9 +5,12 @@ build:
   artifacts:
     - image: steam
       context: ./..
-      ko: {}
-      # docker:
-      #   dockerfile: Dockerfile
+      ko:
+        dependencies:
+          paths:
+            - "*.go"
+          ignore:
+            - "*_test.go"
 deploy:
   kubectl:
     manifests:
