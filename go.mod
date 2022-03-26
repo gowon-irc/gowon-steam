@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/eclipse/paho.mqtt.golang v1.3.5
-	github.com/gowon-irc/go-gowon v0.0.0-20211113200040-cb1a970bd247
+	github.com/gowon-irc/go-gowon v0.0.0-20211129183802-c73579a30a59
 	github.com/jessevdk/go-flags v1.5.0
 	gopkg.in/errgo.v2 v2.1.0
 )
