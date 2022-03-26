@@ -33,7 +33,6 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-
   build:
     name: Build
     runs-on: ubuntu-20.04
