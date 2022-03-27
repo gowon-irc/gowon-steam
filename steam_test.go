@@ -89,3 +89,87 @@ func TestSteamGetId(t *testing.T) {
 		})
 	}
 }
+
+func generateRecentlyPlayedRes(count int) recentlyPlayedRes {
+	r := recentlyPlayedRes{}
+
+	for i := 0; i < count; i++ {
+		g := struct {
+			AppId int
+			Name  string
+		}{
+			AppId: 1,
+			Name:  "game",
+		}
+
+		r.Response.Games = append(r.Response.Games, g)
+	}
+
+	return r
+}
+
+func TestRecentlyPlayedResNames(t *testing.T) {
+	cases := []struct {
+		name  string
+		count int
+		out   []string
+	}{
+		{
+			name:  "No games",
+			count: 0,
+			out:   []string{},
+		},
+		{
+			name:  "One game",
+			count: 1,
+			out:   []string{"game"},
+		},
+		{
+			name:  "Two games",
+			count: 2,
+			out:   []string{"game", "game"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rps := generateRecentlyPlayedRes(tc.count)
+			out := rps.Names()
+
+			assert.Equal(t, tc.out, out)
+		})
+	}
+}
+
+func TestRecentlyPlayedResIds(t *testing.T) {
+	cases := []struct {
+		name  string
+		count int
+		out   []int
+	}{
+		{
+			name:  "No games",
+			count: 0,
+			out:   []int{},
+		},
+		{
+			name:  "One game",
+			count: 1,
+			out:   []int{1},
+		},
+		{
+			name:  "Two games",
+			count: 2,
+			out:   []int{1, 1},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rps := generateRecentlyPlayedRes(tc.count)
+			out := rps.Ids()
+
+			assert.Equal(t, tc.out, out)
+		})
+	}
+}

@@ -67,6 +67,8 @@ type recentlyPlayedRes struct {
 }
 
 func (rpr recentlyPlayedRes) Names() (out []string) {
+	out = []string{}
+
 	for _, g := range rpr.Response.Games {
 		out = append(out, g.Name)
 	}
@@ -74,6 +76,8 @@ func (rpr recentlyPlayedRes) Names() (out []string) {
 }
 
 func (rpr recentlyPlayedRes) Ids() (out []int) {
+	out = []int{}
+
 	for _, g := range rpr.Response.Games {
 		out = append(out, g.AppId)
 	}
