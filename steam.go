@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -110,6 +111,8 @@ func getRecentlyPlayed(apiKey, id string, client *http.Client) (*recentlyPlayedR
 }
 
 func colourList(in []string) (out []string) {
+	out = []string{}
+
 	colours := []string{"green", "red", "blue", "orange", "magenta", "cyan", "yellow"}
 	cl := len(colours)
 
@@ -233,6 +236,7 @@ func steamLastAchievement(apiKey, user string, client *http.Client) (string, err
 		return "", err
 	}
 
+	log.Println(recentlyPlayed.Ids())
 	n, err := newestAchievement(apiKey, id, recentlyPlayed.Ids(), client)
 
 	if errors.Is(profileNotPublicErr)(err) {
