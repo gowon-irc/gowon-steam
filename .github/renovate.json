@@ -7,6 +7,10 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "github-tags"
+    },
+    {
+        "matchDataSources": ["go"],
+        "automerge": true
     }
   ],
   "timezone": "Europe/London"
