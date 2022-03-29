@@ -44,7 +44,7 @@ jobs:
         ports:
           - 1883:1883
         volumes:
-          - ${{ github.workspace }}/.github/workflows/mosquitto.conf:/mosquitto/config/mosquitto.conf
+          - ${{ github.workspace }}/.github/workflows/mosquitto_config:/mosquitto/config
 
     steps:
       - name: Checkout
