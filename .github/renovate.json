@@ -9,8 +9,8 @@
       "groupName": "github-tags"
     },
     {
-        "matchDataSources": ["go"],
-        "automerge": true
+      "matchDatasources": [ "go" ],
+      "automerge": true
     }
   ],
   "timezone": "Europe/London"
