@@ -7,7 +7,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.4.1
 	github.com/gowon-irc/go-gowon v0.0.0-20211129183802-c73579a30a59
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/stretchr/testify v1.7.4
+	github.com/stretchr/testify v1.8.0
 	gopkg.in/errgo.v2 v2.1.0
 )
 
