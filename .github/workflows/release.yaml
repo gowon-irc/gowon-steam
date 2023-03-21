@@ -80,13 +80,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.13
+        uses: gittools/actions/gitversion/setup@v0.10.2
         with:
           versionSpec: '5.x'
 
       - name: GitVersion
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.13
+        uses: gittools/actions/gitversion/execute@v0.10.2
 
       - name: Prepare
         id: prep
@@ -100,7 +100,7 @@ jobs:
           echo ::set-output name=GITVERSIONF::${GITVERSION_FULLSEMVER/+/-}
 
       - name: Setup ko
-        uses: imjasonh/setup-ko@v0.5
+        uses: imjasonh/setup-ko@v0.6
 
       - name: Build local image
         run: >
