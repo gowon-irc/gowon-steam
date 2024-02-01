@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: tiny
-          image: ghcr.io/shanedabes/tiny:v0.9.0
+          image: ghcr.io/surskitt/tiny:v0.9.0
           volumeMounts:
             - name: tiny-config
               mountPath: /tiny.yml
