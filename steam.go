@@ -186,25 +186,20 @@ func getAchievements(apiKey, id string, appId int, client *http.Client) (*player
 		return j, err
 	}
 
+	if j.PlayerStats.Error == "Profile is not public" {
+		return j, profileNotPublicErr
+	}
+
 	return j, nil
 }
 
-func newestAchievement(apiKey, id string, appIds []int, client *http.Client) (string, error) {
+func newestAchievement(am map[string]*playerAchievementsRes) string {
 	game := ""
 	newest := playerAchievement{
 		UnlockTime: 0,
 	}
 
-	for _, i := range appIds {
-		as, err := getAchievements(apiKey, id, i, client)
-		if err != nil {
-			return "", err
-		}
-
-		if as.PlayerStats.Error == "Profile is not public" {
-			return "", profileNotPublicErr
-		}
-
+	for _, as := range am {
 		for _, a := range as.PlayerStats.Achievements {
 			if a.UnlockTime > newest.UnlockTime {
 				game = as.PlayerStats.GameName
@@ -214,10 +209,10 @@ func newestAchievement(apiKey, id string, appIds []int, client *http.Client) (st
 	}
 
 	if newest.UnlockTime == 0 {
-		return "", nil
+		return ""
 	}
 
-	return fmt.Sprintf("%s (%s) - %s", newest.Name, newest.Description, game), nil
+	return fmt.Sprintf("%s - %s (%s)", game, newest.Name, newest.Description)
 }
 
 func steamLastAchievement(apiKey, user string, client *http.Client) (string, error) {
@@ -237,7 +232,17 @@ func steamLastAchievement(apiKey, user string, client *http.Client) (string, err
 	}
 
 	log.Println(recentlyPlayed.Ids())
-	n, err := newestAchievement(apiKey, id, recentlyPlayed.Ids(), client)
+
+	achievementsMap := make(map[string]*playerAchievementsRes)
+	for _, i := range recentlyPlayed.Ids() {
+		as, err := getAchievements(apiKey, id, i, client)
+		if err != nil {
+			return "", err
+		}
+
+		game := as.PlayerStats.GameName
+		achievementsMap[game] = as
+	}
 
 	if errors.Is(profileNotPublicErr)(err) {
 		return "Error: profile is not public", nil
@@ -246,6 +251,8 @@ func steamLastAchievement(apiKey, user string, client *http.Client) (string, err
 	if err != nil {
 		return "", err
 	}
+
+	n := newestAchievement(achievementsMap)
 
 	if n == "" {
 		return fmt.Sprintf("%s has no recently unlocked steam achievements", user), nil

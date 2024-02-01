@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -358,76 +359,62 @@ func TestGetAchievements(t *testing.T) {
 }
 
 func TestNewestAchievement(t *testing.T) {
+	makeResMap := func(ids ...int) map[string]*playerAchievementsRes {
+		rm := make(map[string]*playerAchievementsRes)
+
+		for _, i := range ids {
+			j := openTestFile(t, "TestNewestAchievement", fmt.Sprintf("%d.json", i))
+
+			r := playerAchievementsRes{}
+			err := json.Unmarshal(j, &r)
+			assert.Nil(t, err)
+
+			rm[r.PlayerStats.GameName] = &r
+		}
+
+		return rm
+	}
+
 	cases := []struct {
-		name   string
-		appIds []int
-		out    string
-		errMsg string
+		name string
+		m    map[string]*playerAchievementsRes
+		out  string
 	}{
 		{
-			name:   "Empty id list",
-			appIds: []int{},
-			out:    "",
-			errMsg: "",
+			name: "Empty map",
+			m:    map[string]*playerAchievementsRes{},
+			out:  "",
 		},
 		{
-			name:   "Empty data returned",
-			appIds: []int{1},
-			out:    "",
-			errMsg: "unexpected end of JSON input",
+			name: "One game",
+			m:    makeResMap(1),
+			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
 		},
 		{
-			name:   "One id passed",
-			appIds: []int{2},
-			out:    "MORE () - SUPERHOT: MIND CONTROL DELETE",
-			errMsg: "",
+			name: "Two ids passed, newest first",
+			m:    makeResMap(1, 2),
+			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
 		},
 		{
-			name:   "Two ids passed, newest first",
-			appIds: []int{2, 3},
-			out:    "MORE () - SUPERHOT: MIND CONTROL DELETE",
-			errMsg: "",
+			name: "Two ids passed, newest second",
+			m:    makeResMap(2, 1),
+			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
 		},
 		{
-			name:   "Two ids passed, newest second",
-			appIds: []int{3, 2},
-			out:    "MORE () - SUPERHOT: MIND CONTROL DELETE",
-			errMsg: "",
+			name: "One id, no achievements",
+			m:    makeResMap(3),
+			out:  "",
 		},
 		{
-			name:   "One id, no achievements",
-			appIds: []int{4},
-			out:    "",
-			errMsg: "",
-		},
-		{
-			name:   "Two ids, first no achivements",
-			appIds: []int{4, 2},
-			out:    "MORE () - SUPERHOT: MIND CONTROL DELETE",
-			errMsg: "",
+			name: "Two ids, first no achivements",
+			m:    makeResMap(3, 1),
+			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			bodies := map[string]string{}
-
-			for _, i := range tc.appIds {
-				url := fmt.Sprintf(playerAchievementsUrl, "key", "id", i)
-				body := openTestFile(t, "TestNewestAchievement", fmt.Sprintf("%d.json", i))
-
-				bodies[url] = string(body)
-			}
-
-			client := NewConditionalTestClient(bodies)
-
-			out, err := newestAchievement("key", "id", tc.appIds, client)
-
-			if tc.errMsg == "" {
-				assert.Nil(t, err)
-			} else {
-				assert.ErrorContains(t, err, tc.errMsg)
-			}
+			out := newestAchievement(tc.m)
 
 			assert.Equal(t, tc.out, out)
 		})
@@ -474,7 +461,7 @@ func TestSteamLastAchievement(t *testing.T) {
 		{
 			name:      "achievements found",
 			testFiles: [3]string{"id_found.json", "one_game.json", "achievements.json"},
-			out:       "id's last steam achievement: MORE () - SUPERHOT: MIND CONTROL DELETE",
+			out:       "id's last steam achievement: SUPERHOT: MIND CONTROL DELETE - MORE ()",
 			errMsg:    "",
 		},
 	}
