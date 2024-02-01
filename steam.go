@@ -215,6 +215,29 @@ func newestAchievement(am map[string]*playerAchievementsRes) string {
 	return fmt.Sprintf("%s - %s (%s)", game, newest.Name, newest.Description)
 }
 
+func getAchievementCount(as *playerAchievementsRes) string {
+	total := len(as.PlayerStats.Achievements)
+
+	achieved := 0
+	for _, a := range as.PlayerStats.Achievements {
+		if a.UnlockTime > 0 {
+			achieved += 1
+		}
+	}
+
+	c := func(a, t int) string {
+		if a == t {
+			return "green"
+		}
+
+		return "yellow"
+	}
+
+	colour := c(total, achieved)
+
+	return fmt.Sprintf("{%s}%d/%d{clear}", colour, achieved, total)
+}
+
 func steamLastAchievement(apiKey, user string, client *http.Client) (string, error) {
 	id, err := steamGetId(apiKey, user, client)
 

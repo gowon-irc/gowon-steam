@@ -421,6 +421,59 @@ func TestNewestAchievement(t *testing.T) {
 	}
 }
 
+func TestGetAchievementCount(t *testing.T) {
+	makeRes := func(id int) *playerAchievementsRes {
+		j := openTestFile(t, "TestGetAchievementCount", fmt.Sprintf("%d.json", id))
+
+		r := playerAchievementsRes{}
+		err := json.Unmarshal(j, &r)
+		assert.Nil(t, err)
+
+		return &r
+	}
+
+	cases := []struct {
+		name string
+		id   int
+		out  string
+	}{
+		{
+			name: "Multiple achieved",
+			id:   1,
+			out:  "{yellow}3/14{clear}",
+		},
+		{
+			name: "One achieved",
+			id:   2,
+			out:  "{yellow}1/3{clear}",
+		},
+		{
+			name: "No achievements",
+			id:   3,
+			out:  "{green}0/0{clear}",
+		},
+		{
+			name: "None achieved",
+			id:   4,
+			out:  "{yellow}0/3{clear}",
+		},
+		{
+			name: "All achieved",
+			id:   5,
+			out:  "{green}3/3{clear}",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := makeRes(tc.id)
+			out := getAchievementCount(r)
+
+			assert.Equal(t, tc.out, out)
+		})
+	}
+}
+
 func TestSteamLastAchievement(t *testing.T) {
 	cases := []struct {
 		name      string
