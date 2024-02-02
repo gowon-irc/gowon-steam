@@ -270,10 +270,11 @@ func steamLastAchievement(apiKey, user string, client *http.Client) (string, err
 	}
 
 	game, newest := newestAchievement(achievementsMap)
+	count := getAchievementCount(game)
 
 	if newest.UnlockTime == 0 {
 		return fmt.Sprintf("%s has no recently unlocked steam achievements", user), nil
 	}
 
-	return fmt.Sprintf("%s's last steam achievement: %s - %s (%s)", user, game.PlayerStats.GameName, newest.Name, newest.Description), nil
+	return fmt.Sprintf("%s's last steam achievement: %s - %s (%s) (%s)", user, game.PlayerStats.GameName, newest.Name, newest.Description, count), nil
 }

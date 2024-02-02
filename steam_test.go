@@ -514,7 +514,7 @@ func TestSteamLastAchievement(t *testing.T) {
 		{
 			name:      "achievements found",
 			testFiles: [3]string{"id_found.json", "one_game.json", "achievements.json"},
-			out:       "id's last steam achievement: SUPERHOT: MIND CONTROL DELETE - MORE ()",
+			out:       "id's last steam achievement: SUPERHOT: MIND CONTROL DELETE - MORE () ({yellow}1/14{clear})",
 			errMsg:    "",
 		},
 	}
