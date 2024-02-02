@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -193,8 +192,8 @@ func getAchievements(apiKey, id string, appId int, client *http.Client) (*player
 	return j, nil
 }
 
-func newestAchievement(am map[string]*playerAchievementsRes) string {
-	game := ""
+func newestAchievement(am map[string]*playerAchievementsRes) (*playerAchievementsRes, playerAchievement) {
+	game := &playerAchievementsRes{}
 	newest := playerAchievement{
 		UnlockTime: 0,
 	}
@@ -202,17 +201,13 @@ func newestAchievement(am map[string]*playerAchievementsRes) string {
 	for _, as := range am {
 		for _, a := range as.PlayerStats.Achievements {
 			if a.UnlockTime > newest.UnlockTime {
-				game = as.PlayerStats.GameName
+				game = as
 				newest = a
 			}
 		}
 	}
 
-	if newest.UnlockTime == 0 {
-		return ""
-	}
-
-	return fmt.Sprintf("%s - %s (%s)", game, newest.Name, newest.Description)
+	return game, newest
 }
 
 func getAchievementCount(as *playerAchievementsRes) string {
@@ -254,11 +249,14 @@ func steamLastAchievement(apiKey, user string, client *http.Client) (string, err
 		return "", err
 	}
 
-	log.Println(recentlyPlayed.Ids())
-
 	achievementsMap := make(map[string]*playerAchievementsRes)
 	for _, i := range recentlyPlayed.Ids() {
 		as, err := getAchievements(apiKey, id, i, client)
+
+		if errors.Is(profileNotPublicErr)(err) {
+			return "Error: profile is not public", nil
+		}
+
 		if err != nil {
 			return "", err
 		}
@@ -267,19 +265,15 @@ func steamLastAchievement(apiKey, user string, client *http.Client) (string, err
 		achievementsMap[game] = as
 	}
 
-	if errors.Is(profileNotPublicErr)(err) {
-		return "Error: profile is not public", nil
-	}
-
 	if err != nil {
 		return "", err
 	}
 
-	n := newestAchievement(achievementsMap)
+	game, newest := newestAchievement(achievementsMap)
 
-	if n == "" {
+	if newest.UnlockTime == 0 {
 		return fmt.Sprintf("%s has no recently unlocked steam achievements", user), nil
 	}
 
-	return fmt.Sprintf("%s's last steam achievement: %s", user, n), nil
+	return fmt.Sprintf("%s's last steam achievement: %s - %s (%s)", user, game.PlayerStats.GameName, newest.Name, newest.Description), nil
 }

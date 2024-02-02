@@ -388,17 +388,17 @@ func TestNewestAchievement(t *testing.T) {
 		{
 			name: "One game",
 			m:    makeResMap(1),
-			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
+			out:  "MORE",
 		},
 		{
 			name: "Two ids passed, newest first",
 			m:    makeResMap(1, 2),
-			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
+			out:  "MORE",
 		},
 		{
 			name: "Two ids passed, newest second",
 			m:    makeResMap(2, 1),
-			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
+			out:  "MORE",
 		},
 		{
 			name: "One id, no achievements",
@@ -408,15 +408,15 @@ func TestNewestAchievement(t *testing.T) {
 		{
 			name: "Two ids, first no achivements",
 			m:    makeResMap(3, 1),
-			out:  "SUPERHOT: MIND CONTROL DELETE - MORE ()",
+			out:  "MORE",
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			out := newestAchievement(tc.m)
+			_, out := newestAchievement(tc.m)
 
-			assert.Equal(t, tc.out, out)
+			assert.Equal(t, tc.out, out.Name)
 		})
 	}
 }
