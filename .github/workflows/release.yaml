@@ -100,7 +100,7 @@ jobs:
           echo ::set-output name=GITVERSIONF::${GITVERSION_FULLSEMVER/+/-}
 
       - name: Setup ko
-        uses: imjasonh/setup-ko@v0.8
+        uses: imjasonh/setup-ko@v0.9
 
       - name: Build local image
         run: >
